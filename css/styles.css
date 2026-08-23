@@ -504,6 +504,9 @@ nav.main-nav a:hover { color: var(--fg); }
   max-width: 1080px;
   margin-top: 4px;
 }
+.services-statement .sw { color: var(--fg-faint); transition: color .4s var(--ease); }
+.services-statement .sw.revealed { color: var(--fg); }
+.services-statement strong .sw.revealed { color: var(--accent-bright); }
 .services-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -714,7 +717,7 @@ nav.main-nav a:hover { color: var(--fg); }
 .marquee-track span.dot::after { content: '\2022'; margin-left: 8px; color: var(--accent); }
 @keyframes marquee {
   from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
+  to { transform: translateX(var(--marquee-end, -50%)); }
 }
 
 /* ============ LOCATIONS ============ */

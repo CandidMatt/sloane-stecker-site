@@ -1,4 +1,26 @@
 document.addEventListener('DOMContentLoaded', () => {
+  // marquees: duplicate content until it comfortably exceeds any viewport width,
+  // so wide/ultra-wide screens never reveal a gap where the loop seam falls short
+  const marqueeOriginals = new WeakMap();
+  const setupMarquee = (track) => {
+    if (!marqueeOriginals.has(track)) marqueeOriginals.set(track, track.innerHTML);
+    const singleSetHTML = marqueeOriginals.get(track);
+    track.innerHTML = singleSetHTML;
+    const singleWidth = track.scrollWidth;
+    if (!singleWidth) return;
+    const targetWidth = window.innerWidth * 3;
+    const copies = Math.max(2, Math.ceil(targetWidth / singleWidth));
+    track.innerHTML = singleSetHTML.repeat(copies);
+    track.style.setProperty('--marquee-end', `-${100 / copies}%`);
+  };
+  const marqueeTracks = document.querySelectorAll('.marquee-track');
+  marqueeTracks.forEach(setupMarquee);
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => marqueeTracks.forEach(setupMarquee), 300);
+  });
+
   const header = document.querySelector('header.site');
   const onScroll = () => {
     header.classList.toggle('scrolled', window.scrollY > 20);
@@ -76,6 +98,47 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }, { threshold: 0.4 });
   countEls.forEach(el => countIo.observe(el));
+
+  // scroll-linked word highlight: dims in, brightens word by word as the reader scrolls past
+  const statement = document.querySelector('.services-statement');
+  if (statement) {
+    const walker = document.createTreeWalker(statement, NodeFilter.SHOW_TEXT);
+    const textNodes = [];
+    let node;
+    while ((node = walker.nextNode())) textNodes.push(node);
+    textNodes.forEach((tn) => {
+      const frag = document.createDocumentFragment();
+      tn.textContent.split(/(\s+)/).forEach((part) => {
+        if (part.trim() === '') {
+          frag.appendChild(document.createTextNode(part));
+        } else {
+          const span = document.createElement('span');
+          span.className = 'sw';
+          span.textContent = part;
+          frag.appendChild(span);
+        }
+      });
+      tn.parentNode.replaceChild(frag, tn);
+    });
+    const words = [...statement.querySelectorAll('.sw')];
+    let stmtTicking = false;
+    const updateStatementReveal = () => {
+      stmtTicking = false;
+      const rect = statement.getBoundingClientRect();
+      const revealLine = window.innerHeight * 0.68;
+      const progress = Math.min(1, Math.max(0, (revealLine - rect.top) / rect.height));
+      const revealCount = Math.round(progress * words.length);
+      words.forEach((w, i) => w.classList.toggle('revealed', i < revealCount));
+    };
+    updateStatementReveal();
+    window.addEventListener('scroll', () => {
+      if (!stmtTicking) {
+        stmtTicking = true;
+        requestAnimationFrame(updateStatementReveal);
+      }
+    }, { passive: true });
+    window.addEventListener('resize', updateStatementReveal);
+  }
 
   // subtle parallax drift on flanking/about photos only (service photos stay static)
   const isMobile = () => window.innerWidth < 980;
