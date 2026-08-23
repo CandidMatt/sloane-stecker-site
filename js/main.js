@@ -56,6 +56,27 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  // count-up numbers when they scroll into view
+  const countEls = document.querySelectorAll('[data-count-to]');
+  const countIo = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      countIo.unobserve(entry.target);
+      const el = entry.target;
+      const target = parseInt(el.getAttribute('data-count-to'), 10);
+      const duration = 1600;
+      const startTime = performance.now();
+      const tick = (now) => {
+        const progress = Math.min((now - startTime) / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        el.textContent = Math.round(eased * target);
+        if (progress < 1) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    });
+  }, { threshold: 0.4 });
+  countEls.forEach(el => countIo.observe(el));
+
   // subtle parallax drift on flanking/about photos only (service photos stay static)
   const isMobile = () => window.innerWidth < 980;
   const speeds = [0.06, -0.07, 0.05, -0.06, 0.07];
