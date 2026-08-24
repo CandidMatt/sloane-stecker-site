@@ -186,7 +186,7 @@ header.site.scrolled {
   border-bottom: 1px solid var(--line);
 }
 
-.logo img { height: 40px; width: auto; }
+.logo img { height: 40px; width: auto; filter: brightness(0) invert(1); }
 
 nav.main-nav {
   display: flex;
@@ -764,7 +764,7 @@ footer.site {
   gap: 40px;
   padding-bottom: 60px;
 }
-.footer-brand img { height: 46px; margin-bottom: 20px; }
+.footer-brand img { height: 46px; margin-bottom: 20px; filter: brightness(0) invert(1); }
 .footer-brand p { color: var(--fg-dim); font-size: 14px; max-width: 280px; line-height: 1.6; }
 .footer-col h4 {
   font-family: var(--font-mono);
